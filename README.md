@@ -243,7 +243,8 @@ In the SonarQube AAD plugin config make sure you use `Unique` as value for `Logi
 The freshly set up SonarQube instance comes with one admin user configured: `un: admin, pw: admin`. Once the AAD connection is established and AAD authentication is enabled, logout and validate AAD authentication. Even with AAD connected you can still login using the initial admin account. We will still need the admin account to allow 3rd party apps to access the API. Therefore generate a strong password and immediately store it in our key vault.
 
 ```bash
-az keyvault secret set --vault-name $YOUR_KEY_VAULT --name 'sonarqube-admin' --value '<VALUE>'
+az keyvault secret set --vault-name $YOUR_KEY_VAULT --name 'sonarqube-app-admin' --value '<VALUE>'
+az keyvault secret set --vault-name $YOUR_KEY_VAULT --name 'sonarqube-app-admin-password' --value '<VALUE>'
 ```
 
 ## Final step: Connect SonarQube to VSTS
