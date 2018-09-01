@@ -57,27 +57,28 @@ Here the set of variables used throughout this guide. Notice we retrieve Azure K
 
 ```bash
 # General
-export RESOURCE_GROUP_NAME="apinext-sonarqube-rg"
+export PROJECT_PREFIX="<your-project-prefix>"
+export RESOURCE_GROUP_NAME="$PROJECT_PREFIX-sonarqube-rg"
 export LOCATION="westeurope"
 
 # SQL database related
-export SQL_ADMIN_USER=`az keyvault secret show -n sonarqube-sql-admin --vault-name apinext-keyvault | jq -r '.value'`
-export SQL_ADMIN_PASSWORD=`az keyvault secret show -n sonarqube-sql-admin-password --vault-name apinext-keyvault | jq -r '.value'`
-export SQL_SERVER_NAME="apinext-sql-server"
-export DATABASE_NAME="apinext-sonar-sql-db"
+export SQL_ADMIN_USER=`az keyvault secret show -n sonarqube-sql-admin --vault-name $YOUR_KEY_VAULT | jq -r '.value'`
+export SQL_ADMIN_PASSWORD=`az keyvault secret show -n sonarqube-sql-admin-password --vault-name $YOUR_KEY_VAULT | jq -r '.value'`
+export SQL_SERVER_NAME="$PROJECT_PREFIX-sql-server"
+export DATABASE_NAME="$PROJECT_PREFIX-sonar-sql-db"
 export DATABASE_SKU="S0"
 
 # Webapp related 
-export APP_SERVICE_NAME="apinext-sonarqube-app-service"
+export APP_SERVICE_NAME="$PROJECT_PREFIX-sonarqube-app-service"
 export APP_SERVICE_SKU="S1"
 
 # Container image related
-export CONTAINER_REGISTRY_NAME="apinextacr"
+export CONTAINER_REGISTRY_NAME="<your-acr-name>"
 export CONTAINER_REGISTRY_FQDN="$CONTAINER_REGISTRY_NAME.azurecr.io"
-export REG_ADMIN_USER=`az keyvault secret show -n container-registry-admin --vault-name apinext-keyvault | jq -r '.value'`
-export REG_ADMIN_PASSWORD=`az keyvault secret show -n container-registry-admin-password --vault-name apinext-keyvault | jq -r '.value'`
-export WEBAPP_NAME="apinext-sonarqube-webapp"
-export CONTAINER_IMAGE_NAME="apinextsonar"
+export REG_ADMIN_USER=`az keyvault secret show -n container-registry-admin --vault-name $YOUR_KEY_VAULT | jq -r '.value'`
+export REG_ADMIN_PASSWORD=`az keyvault secret show -n container-registry-admin-password --vault-name $YOUR_KEY_VAULT | jq -r '.value'`
+export WEBAPP_NAME="$PROJECT_PREFIX-sonarqube-webapp"
+export CONTAINER_IMAGE_NAME="$PROJECT_PREFIXsonar"
 
 # Concatenated variable strings for better readability
 export DB_CONNECTION_STRING="jdbc:sqlserver://$SQL_SERVER_NAME.database.windows.net:1433;database=$DATABASE_NAME;user=$SQL_ADMIN_USER@$SQL_SERVER_NAME;password=$SQL_ADMIN_PASSWORD;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;"
@@ -260,4 +261,5 @@ When integrated successfully, SonarQube adds a new tile to the build summary pag
 ![image](https://user-images.githubusercontent.com/6577198/44949541-07f79a80-ae34-11e8-84e2-4c06474da20f.png)
 
 This is it! Thanks for reading all the way through.
+
 Adrian
