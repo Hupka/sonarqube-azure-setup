@@ -150,7 +150,7 @@ docker run \
     -p 9000:9000 \
     -p 9092:9092 \
     -e "SQLAZURECONNSTR=jdbc:sqlserver://$SQL_SERVER_NAME.database.windows.net:1433;database=$DATABASE_NAME;user=$SQL_ADMIN_USER@$SQL_SERVER_NAME;password=$SQL_ADMIN_PASSWORD;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;" \
-    $apinextCONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME:latest
+    $CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME:latest
 ```
 
 This tests a couple of things:
