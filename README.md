@@ -210,7 +210,7 @@ az webapp config container set \
     --docker-registry-server-password $REG_ADMIN_PASSWORD
 ```
 
-The last command registers our container registry and authorizes the Web App for pulling images. At this point everything is set up and we need a little patience. I suggest you restart the Web App to be sure all environment variables are correctly picked up and wait for a few minutes.
+The last command registers our container registry and authorizes the Web App for pulling images. At this point everything is set up and we need a little patience. I suggest you restart the Web App to be sure all environment variables are correctly picked up and wait for a few minutes - this may very well take 10 minutes.
 
 ```bash
 # Restart app to ensure all environment variables are considered correctly; wait 5 minutes.
