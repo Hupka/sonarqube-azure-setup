@@ -78,7 +78,7 @@ export CONTAINER_REGISTRY_FQDN="$CONTAINER_REGISTRY_NAME.azurecr.io"
 export REG_ADMIN_USER=`az keyvault secret show -n container-registry-admin --vault-name $YOUR_KEY_VAULT | jq -r '.value'`
 export REG_ADMIN_PASSWORD=`az keyvault secret show -n container-registry-admin-password --vault-name $YOUR_KEY_VAULT | jq -r '.value'`
 export WEBAPP_NAME="$PROJECT_PREFIX-sonarqube-webapp"
-export CONTAINER_IMAGE_NAME="$PROJECT_PREFIXsonar"
+export CONTAINER_IMAGE_NAME="$PROJECT_PREFIX-sonar"
 
 # Concatenated variable strings for better readability
 export DB_CONNECTION_STRING="jdbc:sqlserver://$SQL_SERVER_NAME.database.windows.net:1433;database=$DATABASE_NAME;user=$SQL_ADMIN_USER@$SQL_SERVER_NAME;password=$SQL_ADMIN_PASSWORD;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;"
