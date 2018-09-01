@@ -144,7 +144,7 @@ az sql server firewall-rule create \
 
 This step is particularly for myself: I lost a couple of hours because I always went through the full guide deploying the instance to the hard-to-debug Azure Web App. Due to my unfamiliarity with Azure Web Apps it cost me hours to pinpoint down the issues I had. What in the end saved me, and should have been my go-to right away, was testing everything locally!
 
-> Note: this locally tested call might compromise the SQL database. After testing this locally I had to delete the SQL database (not the server!) and re-create it with the command in Step 3.
+> Note: this locally executed `docker run` command might compromise the newly created SQL database. After testing this locally I had to delete the SQL database (not the server!) and re-create it with the command in Step 3.
 
 To have a locally run Docker container connect to your Azure SQL database you have to extend the firewall rules to accept incoming requests from your current client ip address. Azure helps you here: navigate to **https://portal.azure.com** -> `<your-sql-server>` -> **"Firewalls and virtual networks"** and click the button at the top **"+ Add client IP"** and press **"save"** afterwards. After a few seconds your locally run Docker container can access your SQL server.
 
