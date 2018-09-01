@@ -144,12 +144,14 @@ az sql server firewall-rule create \
 
 This step is particularly for myself: I lost a couple of hours because I always went through the full guide deploying the instance to the hard-to-debug Azure Web App. Due to my unfamiliarity with Azure Web Apps it cost me hours to pinpoint down the issues I had. What in the end saved me, and should have been my go-to right away, was testing everything locally!
 
+To have a locally run Docker container connect to your Azure SQL database you have to extend the firewall rules to accept incoming requests from your current client ip address. Azure helps you here: navigate to **https://portal.azure.com** -> `<your-sql-server>` -> **"Firewalls and virtual networks"** and click the button at the top **"+ Add client IP"** and press **"save"** afterwards. After a few seconds your locally run Docker container can access your SQL server.
+
 ```bash
 docker run \
     --name sonarqube \
     -p 9000:9000 \
     -p 9092:9092 \
-    -e "SQLAZURECONNSTR=jdbc:sqlserver://$SQL_SERVER_NAME.database.windows.net:1433;database=$DATABASE_NAME;user=$SQL_ADMIN_USER@$SQL_SERVER_NAME;password=$SQL_ADMIN_PASSWORD;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;" \
+    -e "SQLAZURECONNSTR_SONARQUBE_JDBC_URL=jdbc:sqlserver://$SQL_SERVER_NAME.database.windows.net:1433;database=$DATABASE_NAME;user=$SQL_ADMIN_USER@$SQL_SERVER_NAME;password=$SQL_ADMIN_PASSWORD;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;" \
     $CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME:latest
 ```
 
