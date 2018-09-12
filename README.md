@@ -26,10 +26,10 @@ I have uploaded this guide, the referenced shell scripts as well as the Dockerfi
 - [Step 1: Gather data to set `env` variables](#step-1-gather-data-to-set-env-variables)
 - [Step 2: Build our Docker image and push it to our private registry](#step-2-build-our-docker-image-and-push-it-to-our-private-registry)
 - [Step 3: Create the managed SQL database](#step-3-create-the-managed-sql-database)
-- [Step 4: Test if you have everything to connect to your database](#step-4-test-if-you-have-everything-to-connect-to-your-database)
-- [Step 5: Setup Azure Web App with our SonarQube image](#step-5-setup-azure-web-app-with-our-sonarqube-image)
-- [Step 6: Enable Azure AD authentication for your SonarQube instance](#step-6-enable-azure-ad-authentication-for-your-sonarqube-instance)
+- [Step 4: Setup Azure Web App with our SonarQube image](#step-4-setup-azure-web-app-with-our-sonarqube-image)
+- [Step 5: Enable Azure AD authentication for your SonarQube instance](#step-5-enable-azure-ad-authentication-for-your-sonarqube-instance)
 - [Final step: Connect SonarQube to VSTS](#final-step-connect-sonarqube-to-vsts)
+- [Troubleshooting: Test if you have everything to connect to your database](#troubleshooting-test-if-you-have-everything-to-connect-to-your-database)
 
 ## Prerequisites
 
@@ -53,7 +53,7 @@ az keyvault secret set --vault-name $YOUR_KEY_VAULT --name 'container-registry-a
 az keyvault secret set --vault-name $YOUR_KEY_VAULT --name 'container-registry-admin-password' --value '<VALUE>'
 ```
 
-Here the set of variables used throughout this guide. Notice we retrieve Azure Keyvault secrets using the Azure CLI and not with a Service Principal. This would be more secure but you Azure user account is required to be permitted to work with Service Principal users.
+Here is the set of variables used throughout this guide. Notice we retrieve Azure Keyvault secrets using the Azure CLI and not with a Service Principal. This would be more secure but you Azure user account is required to be permitted to work with Service Principal users.
 
 ```bash
 # General
@@ -79,6 +79,7 @@ export REG_ADMIN_USER=`az keyvault secret show -n container-registry-admin --vau
 export REG_ADMIN_PASSWORD=`az keyvault secret show -n container-registry-admin-password --vault-name $YOUR_KEY_VAULT | jq -r '.value'`
 export WEBAPP_NAME="$PROJECT_PREFIX-sonarqube-webapp"
 export CONTAINER_IMAGE_NAME="$PROJECT_PREFIX-sonar"
+export CONTAINER_IMAGE_TAG="<Tag>"
 
 # Concatenated variable strings for better readability
 export DB_CONNECTION_STRING="jdbc:sqlserver://$SQL_SERVER_NAME.database.windows.net:1433;database=$DATABASE_NAME;user=$SQL_ADMIN_USER@$SQL_SERVER_NAME;password=$SQL_ADMIN_PASSWORD;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;"
@@ -102,9 +103,9 @@ git clone https://github.com/EddEdw/sonarqube-azure-setup.git && cd sonarqube-az
 az acr login --name $CONTAINER_REGISTRY_NAME
 
 # Build the image and push to the registry
-docker build -t $CONTAINER_IMAGE_NAME:latest .
-docker tag $CONTAINER_IMAGE_NAME:latest "$CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME:latest"
-docker push "$CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME:latest"
+docker build -t $CONTAINER_IMAGE_NAME:$CONTAINER_IMAGE_TAG .
+docker tag $CONTAINER_IMAGE_NAME:$CONTAINER_IMAGE_TAG "$CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME:$CONTAINER_IMAGE_TAG"
+docker push "$CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME:$CONTAINER_IMAGE_TAG"
 ```
 
 ## Step 3: Create the managed SQL database
@@ -140,30 +141,7 @@ az sql server firewall-rule create \
     --end-ip-address 0.0.0.0
 ```
 
-## Step 4: Test if you have everything to connect to your database
-
-This step is particularly for myself: I lost a couple of hours because I always went through the full guide deploying the instance to the hard-to-debug Azure Web App. Due to my unfamiliarity with Azure Web Apps it cost me hours to pinpoint down the issues I had. What in the end saved me, and should have been my go-to right away, was testing everything locally!
-
-> Note: this locally executed `docker run` command might compromise the newly created SQL database. After testing this locally I had to delete the SQL database (not the server!) and re-create it with the command in Step 3.
-
-To have a locally run Docker container connect to your Azure SQL database you have to extend the firewall rules to accept incoming requests from your current client ip address. Azure helps you here: navigate to **https://portal.azure.com** -> `<your-sql-server>` -> **"Firewalls and virtual networks"** and click the button at the top **"+ Add client IP"** and press **"save"** afterwards. After a few seconds your locally run Docker container can access your SQL server.
-
-```bash
-docker run \
-    --name sonarqube \
-    -p 9000:9000 \
-    -p 9092:9092 \
-    -e "SQLAZURECONNSTR_SONARQUBE_JDBC_URL=jdbc:sqlserver://$SQL_SERVER_NAME.database.windows.net:1433;database=$DATABASE_NAME;user=$SQL_ADMIN_USER@$SQL_SERVER_NAME;password=$SQL_ADMIN_PASSWORD;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;" \
-    $CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME:latest
-```
-
-This tests a couple of things:
-
-1. Can you connect to your private Docker Registry?
-2. Can you bind the SonarQube image to your managed SQL database?
-3. ... and you get a feeling about how the logs for this setup look like - which helps later on. ;-)
-
-## Step 5: Setup Azure Web App with our SonarQube image
+## Step 4: Setup Azure Web App with our SonarQube image
 
 Deploying the web app is a two-step process: first we create an App Service and connect it with our Web App and the second step is configuring the WebApp to run our container and feeding it with the correct environment variables.
 
@@ -230,17 +208,10 @@ az webapp log download \
 
 If everything went well you now have a running SonarQube instance in an Azure Web App connected to an managed Azure SQL database. Well done! You can now tweak the sizing parameters: more compute power for the Web App, more storage for the SQL database.
 
-## Step 6: Enable Azure AD authentication for your SonarQube instance
+## Step 5: Enable Azure AD authentication for your SonarQube instance
 
 We want to avoid doing access management ourselves in distributed places and we neither want to manage user identities by ourselves. SonarQube has a great community plugin that integrates Azure Active Directory as authentication provider. The plugin offers a very comprehensive [step by step guide to connect the plugin to Azure AD](https://github.com/SonarQubeCommunity/sonar-auth-aad#create-active-directory-application-under-your-azure-active-directory-tenant).
 
-
-The only addition I have to make is that I could only get the plugin to work by adding 2 callback URLs to the AAD App registration. The two callback URLs only are only different in the strange "double slash". Initially it wasn't working and I debugged the SonarQube client's REST calls to AAD and found out about this. Maybe only I have the issue, but maybe it also saves you.
-
-```bash
-https://<$WEBAPP_NAME>.azurewebsites.net/oauth2/callback/aad
-https://<$WEBAPP_NAME>.azurewebsites.net//oauth2/callback/aad
-```
 
 In the SonarQube AAD plugin config make sure you use `Unique` as value for `Login generation strategy`. You now control access to your application by adding Azure Users of your organization to your App Registration in AAD.
 
@@ -268,3 +239,28 @@ When integrated successfully, SonarQube adds a new tile to the build summary pag
 This is it! Thanks for reading all the way through.
 
 Adrian
+
+---
+
+## Troubleshooting: Test if you have everything to connect to your database
+
+This step is particularly for myself: I lost a couple of hours because I always went through the full guide deploying the instance to the hard-to-debug Azure Web App. Due to my unfamiliarity with Azure Web Apps it cost me hours to pinpoint down the issues I had. What in the end saved me, and should have been my go-to right away, was testing everything locally!
+
+> Note: this locally executed `docker run` command might compromise the newly created SQL database. After testing this locally I had to delete the SQL database (not the server!) and re-create it with the command in Step 3.
+
+To have a locally run Docker container connect to your Azure SQL database you have to extend the firewall rules to accept incoming requests from your current client ip address. Azure helps you here: navigate to **https://portal.azure.com** -> `<your-sql-server>` -> **"Firewalls and virtual networks"** and click the button at the top **"+ Add client IP"** and press **"save"** afterwards. After a few seconds your locally run Docker container can access your SQL server.
+
+```bash
+docker run \
+    --name sonarqube \
+    -p 9000:9000 \
+    -p 9092:9092 \
+    -e "SQLAZURECONNSTR_SONARQUBE_JDBC_URL=jdbc:sqlserver://$SQL_SERVER_NAME.database.windows.net:1433;database=$DATABASE_NAME;user=$SQL_ADMIN_USER@$SQL_SERVER_NAME;password=$SQL_ADMIN_PASSWORD;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;" \
+    $CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME:$CONTAINER_IMAGE_TAG
+```
+
+This tests a couple of things:
+
+1. Can you connect to your private Docker Registry?
+2. Can you bind the SonarQube image to your managed SQL database?
+3. ... and you get a feeling about how the logs for this setup look like - which helps later on. ;-)
