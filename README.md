@@ -171,6 +171,7 @@ az webapp config connection-string set \
     --resource-group $RESOURCE_GROUP_NAME \
     --name $WEBAPP_NAME -t SQLAzure \
     --settings SONARQUBE_JDBC_URL=$DB_CONNECTION_STRING
+    --connection-string-type SQLAzure
 az webapp config set \
     --resource-group $RESOURCE_GROUP_NAME \
     --name $WEBAPP_NAME \
