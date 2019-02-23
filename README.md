@@ -158,7 +158,7 @@ az webapp create \
     --resource-group $RESOURCE_GROUP_NAME \
     --plan $APP_SERVICE_NAME \
     --name $WEBAPP_NAME \
-    --deployment-container-image-name $CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME
+    --deployment-container-image-name $CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME:$CONTAINER_IMAGE_TAG
 ```
 
 After the Web App is deployed we have to configure it correctly. The very special part here is the `connectionString` to the Azure SQL database. We can't just set it as a regular environment variable but have to consider some Web App logic for the `connectionString`'s name.
@@ -171,6 +171,7 @@ az webapp config connection-string set \
     --resource-group $RESOURCE_GROUP_NAME \
     --name $WEBAPP_NAME -t SQLAzure \
     --settings SONARQUBE_JDBC_URL=$DB_CONNECTION_STRING
+    --connection-string-type SQLAzure
 az webapp config set \
     --resource-group $RESOURCE_GROUP_NAME \
     --name $WEBAPP_NAME \
@@ -182,7 +183,7 @@ az webapp log config \
 az webapp config container set \
     --name $WEBAPP_NAME \
     --resource-group $RESOURCE_GROUP_NAME \
-    --docker-custom-image-name $CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME \
+    --docker-custom-image-name $CONTAINER_REGISTRY_FQDN/$CONTAINER_IMAGE_NAME:$CONTAINER_IMAGE_TAG \
     --docker-registry-server-url https://$CONTAINER_REGISTRY_FQDN \
     --docker-registry-server-user $REG_ADMIN_USER \
     --docker-registry-server-password $REG_ADMIN_PASSWORD
