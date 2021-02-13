@@ -3,7 +3,7 @@ FROM sonarqube:7.0-alpine
 
 ENV SONAR_KOTLIN_COMMUNITY_VERSION=0.5.0 \
     SONAR_AUTH_AAD_VERSION=1.0 \
-    SONAR_JAVA_VERSION=5.7.0.15470 \
+    SONAR_JAVA_VERSION=6.12.0.24852 \
     SONAR_CSHARP_VERSION=7.10.0.7896
 
 RUN wget "https://github.com/SonarSource/sonar-dotnet/releases/download/${SONAR_CSHARP_VERSION}/sonar-csharp-plugin-${SONAR_CSHARP_VERSION}.jar" \
